@@ -40,6 +40,7 @@ class Algorithm
         void showFinalConfig();
         void show(std::vector<int> tab);
         void showList();
+        void threadAlgo(std::vector<std::vector<int>> &grid, int &state, int &strat);
     private:
         std::vector<int> createTab();
         void localAlgo();
@@ -63,6 +64,7 @@ class Algorithm
         bool process(Algorithm::Node *node);
         void showPath();
         std::vector<int> convertToVector(int **tab);
+        std::vector<std::vector<int>> convertVector(std::vector<int> grid)
         // std::vector<int> fill_A_Config();
         // std::vector<int> fill_B_Config();
         // void checkWhichConfig();

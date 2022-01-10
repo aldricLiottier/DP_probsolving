@@ -43,6 +43,11 @@ int Algorithm::randomInt(std::vector<int> tab)
     return (rand);
 }
 
+void threadAlgo(std::vector<std::vector<int>> &grid, int &state, int &strat)
+{
+    
+}
+
 std::vector<int> Algorithm::convertToVector(int **tab)
 {
     std::vector<int> table;
@@ -54,7 +59,24 @@ std::vector<int> Algorithm::convertToVector(int **tab)
     }
 }
 
-std::vector<int> Algorithm::createTab()
+std::vector<std::vector<int>> Algorithm::convertVector(std::vector<int> grid)
+{
+    std::vector<std::vector<int>> tab;
+    int i = 0;
+    int j = 0;
+
+    for(auto nb: grid) {
+        if (i == _len) {
+            i = 0;
+            j++;
+        }
+        tab[j].push_back(nb);
+        i++;
+    }
+    return (tab);
+}
+
+std::vector<int> Algorithm::createTab() // Fonction générateur de grille, random, generateur, à utiliser avec la méthode de convert de vector
 {
     std::vector<int> tab;
     for(int i = 0; i < _len; i++) {
