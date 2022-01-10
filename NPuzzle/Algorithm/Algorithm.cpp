@@ -11,11 +11,26 @@ Algorithm::Algorithm(int n, STRAT strat)
     _strategy = strat;
     _openList = new List;
     _closeList = new List;
+
+    // _A_finalConfig = fill_A_Config();
+    // _B_finalConfig = fill_B_Config();
 }
 
 Algorithm::~Algorithm()
 {
 }
+
+// std::vector<int> Algorithm::fill_A_Config()
+// {
+//     std::vector<int> vector{1, 2, 3, 8, 0, 4, 7, 6, 5};
+//     return (vector);
+// }
+
+// std::vector<int> Algorithm::fill_B_Config()
+// {
+//     std::vector<int> vector{0, 1, 2, 3, 4, 5, 6, 7, 8};
+//     return (vector);
+// }
 
 int Algorithm::randomInt(std::vector<int> tab)
 {
@@ -26,6 +41,17 @@ int Algorithm::randomInt(std::vector<int> tab)
             rand = 0;
     }
     return (rand);
+}
+
+std::vector<int> Algorithm::convertToVector(int **tab)
+{
+    std::vector<int> table;
+
+    for(int i = 0; i < _len; i++) {
+        for(int j = 0; j < _len; j++) {
+            table.push_back(tab[i][j]);
+        }
+    }
 }
 
 std::vector<int> Algorithm::createTab()
@@ -48,7 +74,6 @@ bool Algorithm::validateTab()
         if (_tab[i] != _finalConfig[i])
             valid = false;
     }
-
     return (valid);
 }
 
@@ -128,45 +153,6 @@ bool Algorithm::isValid(std::vector<int> grid)
     return (valid);
 }
 
-void Algorithm::localAlgo()
-{
-    while (!validateTab()) {
-        findMovement(_tab);
-        int indexZero = std::find(_tab.begin(), _tab.end(), 0) - _tab.begin();
-        std::pair<int, int> bestScore = std::pair<int, int>(-1, -1);
-        int i = 0;
-        // std::cout << "ALL REPRESENTATION" << std::endl;
-        std::vector<int> cpy = _tab;
-        for(auto pair: _indexAvailablePosition) {
-            std::vector<int> tab = _tab;
-            tab[pair.first] = 0;
-            tab[indexZero] = pair.second;
-            int score = computeScore(tab, 1);
-            if ((bestScore.first == -1 && bestScore.second == -1) || score <= bestScore.second) {
-                bestScore.second = score;
-                bestScore.first = i;
-            }
-            i++;
-            // std::cout << "SCORE = " << score << std::endl;
-            // show(tab);
-        }
-        // std::cout << "END REPRESENTATION" << std::endl;
-        _tab[_indexAvailablePosition[bestScore.first].first] = 0;
-        _tab[indexZero] = _indexAvailablePosition[bestScore.first].second;
-        _closedList.push_back(std::pair<int, std::pair<int, int>>(indexZero, std::pair<int, int>(_indexAvailablePosition[bestScore.first].first, _indexAvailablePosition[bestScore.first].second)));
-        _iteration++;
-        std::cout << std::endl << std::endl << "NEXT GENERATION WITH" << std::endl;
-        show(_tab);
-        addToOpenList(_tab, findNodeFromGrid(cpy));
-        std::cout << std::endl << std::endl;
-        std::cout << "GOAL = " << std::endl;
-        std::cout << std::endl << std::endl;
-        // if (_iteration > 10)
-        //     break;
-    }
-    showList();
-}
-
 Algorithm::Node *Algorithm::getBestNode()
 {
     if (_openList == NULL || _openList->node == NULL)
@@ -181,11 +167,208 @@ Algorithm::Node *Algorithm::getBestNode()
     return (bestNode);
 }
 
-bool Algorithm::process(Algorithm::Node *node)
+// bool Algorithm::process(Algorithm::Node *node)
+// {
+//     _tab = node->grid;
+//     _iteration = 1;
+//     bool hasFound = true;
+//     while (!validateTab()) {
+//         findMovement(_tab);
+//         int indexZero = std::find(_tab.begin(), _tab.end(), 0) - _tab.begin();
+//         std::pair<int, int> bestScore = std::pair<int, int>(-1, -1);
+//         int i = 0;
+//         std::vector<int> cpy = _tab;
+//         for(auto pair: _indexAvailablePosition) {
+//             std::vector<int> tab = _tab;
+//             tab[pair.first] = 0;
+//             tab[indexZero] = pair.second;
+//             int score = computeScore(tab, node->score);
+//             if ((bestScore.first == -1 && bestScore.second == -1) || score <= bestScore.second) {
+//                 bestScore.second = score;
+//                 bestScore.first = i;
+//             }
+//             i++;
+//         }
+//         _tab[_indexAvailablePosition[bestScore.first].first] = 0;
+//         _tab[indexZero] = _indexAvailablePosition[bestScore.first].second;
+//         _closedList.push_back(std::pair<int, std::pair<int, int>>(indexZero, std::pair<int, int>(_indexAvailablePosition[bestScore.first].first, _indexAvailablePosition[bestScore.first].second)));
+//         addToOpenList(_tab, findNodeFromGrid(cpy));
+//         _iteration++;
+//         if (_iteration > 1000) {
+//             hasFound = false;
+//             break;
+//         }
+//     }
+//     // if (hasFound)
+//     show(_tab);
+//     return (hasFound);
+// }
+
+template<typename T>
+int search(State &solution, std::set<State> &closed, T &agenda) {
+    int iter = 0;
+    while (!agenda.empty()) {
+        State next = agenda.top();
+        convertToVector(next.getTiles()); // SEND TO GUI
+        agenda.pop();
+
+        if (next.isFinished()) {
+            solution = next;
+            return iter;
+        }
+
+        if (closed.empty() || closed.find(next) == closed.end()) {
+            closed.insert(next);
+
+            std::vector<State> children = next.expand();
+            for (State &s : children) {
+                agenda.push(s);
+            }
+        }
+
+        iter++;
+    }
+
+    return -1;
+}
+
+int dfs(State &solution, std::set<State> &closed, std::stack<State> &agenda) {
+    return search(solution, closed, agenda);
+}
+
+int bestfs(State &solution, std::set<State> &closed, my_priority_queue &agenda) {
+    return search(solution, closed, agenda);
+}
+
+// void Algorithm::informedAlgo()
+// {
+//     int iter = 0;
+//     while (_openList->node != NULL) {
+//         // findMovement(_tab);
+//         Node *bestNode = getBestNode();
+//         if (process(bestNode)) {
+//             break;
+//         }
+//         if (iter != 0)
+//             deleteFromOpenList(bestNode);
+//         if (bestNode->grid == _initialConfig) {
+            
+//         }
+//         iter++;
+//         // INSERT TO CLOSE LIST ?
+//     }
+//     // showList();
+// }
+
+void Algorithm::informedAlgo() // Best First search algorithm
 {
-    _tab = node->grid;
-    _iteration = 1;
-    bool hasFound = true;
+    bool ok = false;
+    State start;
+    while (!ok) {
+        start = State(_len, _len);
+        ok = start.isSolvable();
+    }
+    std::cout << "Initial Config: " << std::endl << start.toString() << std::endl;
+
+    int iterations;
+    auto time0 = std::chrono::high_resolution_clock::now();
+    State end;
+    std::set<State> closedSet;
+
+    my_priority_queue agenda;
+    agenda.push(start);
+    iterations = bestfs(end, closedSet, agenda);
+
+    if (iterations > 0) {
+        auto time1 = std::chrono::high_resolution_clock::now();
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(time1 - time0).count();
+
+        std::cout << "Solution:" << std::endl;
+        std::vector<std::string> path = end.getPath();
+        for (std::string &s : end.getPath()) {
+            std::cout << s << std::endl;
+        }
+
+        std::cout << "Completed in " << path.size() - 1 << " steps." << std::endl
+                  << iterations << " iterations / " << ms << "ms" << std::endl;
+    } else {
+        std::cout << "No solution!" << std::endl;
+    }
+}
+
+// void Algorithm::uninformedAlgo() // Depth-first search algorithm
+// {
+//     _activeQueue.push_back(_tab);
+//     int iter = 0;
+//     while (!validateTab()) {
+//         // std::cout << "QUEUE SIZE = " << _activeQueue.size() << std::endl;
+//         for(auto grid: _activeQueue) {
+//             // show(grid);
+//             findMovement(grid);
+//             int indexZero = std::find(grid.begin(), grid.end(), 0) - grid.begin();
+//             for(auto pair: _indexAvailablePosition) {
+//                 std::vector<int> tab = grid;
+//                 tab[pair.first] = 0;
+//                 tab[indexZero] = pair.second;
+//                 // if (findNodeFromGrid(tab) != NULL) {
+//                 //     continue;
+//                 // }
+
+//                 // addToOpenList(tab, findNodeFromGrid(grid));
+//                 if (isValid(tab))
+//                     return;
+//                 _inactiveQueue.push_back(tab);
+//             }
+//             // std::cout << "NEXT " << std::endl << std::endl << std::endl;
+//         }
+//         _activeQueue.clear();
+//         _activeQueue = _inactiveQueue;
+//         _inactiveQueue.clear();
+//         iter++;
+//         std::cout << "STEP : " << iter + 1 << std::endl;
+//     }
+//     // showList();
+// }
+
+void Algorithm::uninformedAlgo() // Depth first search algorithm
+{
+    bool ok = false;
+    State start;
+    while (!ok) {
+        start = State(_len, _len);
+        ok = start.isSolvable();
+    }
+    std::cout << "Initial Config: " << std::endl << start.toString() << std::endl;
+
+    int iterations;
+    auto time0 = std::chrono::high_resolution_clock::now();
+    State end;
+    std::set<State> closedSet;
+
+    std::stack<State> agenda;
+    agenda.push(start);
+    iterations = dfs(end, closedSet, agenda);
+
+    if (iterations > 0) {
+        auto time1 = std::chrono::high_resolution_clock::now();
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(time1 - time0).count();
+
+        std::cout << "Solution:" << std::endl;
+        std::vector<std::string> path = end.getPath();
+        for (std::string &s : end.getPath()) {
+            std::cout << s << std::endl;
+        }
+
+        std::cout << "Completed in " << path.size() - 1 << " steps." << std::endl
+                  << iterations << " iterations / " << ms << "ms" << std::endl;
+    } else {
+        std::cout << "No solution!" << std::endl;
+    }
+}
+
+void Algorithm::localAlgo()
+{
+    Node *act = _openList->node;
     while (!validateTab()) {
         findMovement(_tab);
         int indexZero = std::find(_tab.begin(), _tab.end(), 0) - _tab.begin();
@@ -196,7 +379,7 @@ bool Algorithm::process(Algorithm::Node *node)
             std::vector<int> tab = _tab;
             tab[pair.first] = 0;
             tab[indexZero] = pair.second;
-            int score = computeScore(tab, node->score);
+            int score = computeScore(tab, 1);
             if ((bestScore.first == -1 && bestScore.second == -1) || score <= bestScore.second) {
                 bestScore.second = score;
                 bestScore.first = i;
@@ -205,59 +388,29 @@ bool Algorithm::process(Algorithm::Node *node)
         }
         _tab[_indexAvailablePosition[bestScore.first].first] = 0;
         _tab[indexZero] = _indexAvailablePosition[bestScore.first].second;
+        
         _closedList.push_back(std::pair<int, std::pair<int, int>>(indexZero, std::pair<int, int>(_indexAvailablePosition[bestScore.first].first, _indexAvailablePosition[bestScore.first].second)));
-        addToOpenList(_tab, findNodeFromGrid(cpy));
         _iteration++;
-        if (_iteration > 1000) {
-            hasFound = false;
-            break;
-        }
+        addToOpenList(_tab, findNodeFromGrid(cpy));
+    
     }
-    // if (hasFound)
-    show(_tab);
-    return (hasFound);
-}
-
-void Algorithm::informedAlgo()
-{
-    while (_openList->node != NULL) {
-        // findMovement(_tab);
-        Node *bestNode = getBestNode();
-        if (process(bestNode)) {
-            break;
-        }
-        deleteFromOpenList(bestNode);
-        if (bestNode->grid == _initialConfig) {
-            
-        }
-        // INSERT TO CLOSE LIST ?
-    }
+    showPath();
     // showList();
 }
 
-
-void Algorithm::uninformedAlgo()
+void Algorithm::showPath()
 {
-    _activeQueue.push_back(_tab);
-    while (!validateTab()) {
-        for(auto grid: _activeQueue) {
-            findMovement(grid);
-            int indexZero = std::find(grid.begin(), grid.end(), 0) - grid.begin();
-            for(auto pair: _indexAvailablePosition) {
-                std::vector<int> tab = grid;
-                tab[pair.first] = 0;
-                tab[indexZero] = pair.second;
-                addToOpenList(tab, findNodeFromGrid(grid));
-                if (isValid(tab))
-                    return;
-                _inactiveQueue.push_back(tab);
-            }
-        }
-        _activeQueue.clear();
-        _activeQueue = _inactiveQueue;
-        _inactiveQueue.clear();
+    Node *act = findNodeFromGrid(_tab);
+    std::vector<std::vector<int>> vec;
+    while (act != NULL) {
+        vec.push_back(act->grid);
+        act = act->parent;
     }
-    showList();
+    vec.back();
+    for(int i = vec.size() - 1; i >= 0; i--) {
+        show(vec[i]);
+        std::cout << std::endl;
+    }
 }
 
 void Algorithm::showList()
@@ -325,15 +478,22 @@ void Algorithm::initList()
     _closeList = closed;
 }
 
-void Algorithm::addToOpenList(std::vector<int> grid, Node *parent)
+Algorithm::Node *Algorithm::addToOpenList(std::vector<int> grid, Node *parent)
 {
     Node *newOne = new Node;
 
     newOne->grid = grid;
     newOne->score = computeScore(grid);
     newOne->parent = parent;
+    // if (parent != NULL) {
+    //     show(parent->grid);
+    //     std::cout << std::endl;
+    //     show(grid);
+    //     std::cout << std::endl;
+    // }
     newOne->next = _openList->node;
     _openList->node = newOne;
+    return (newOne);
 }
 
 void Algorithm::addToCloseList(std::vector<int> grid, Node *parent)
@@ -356,7 +516,7 @@ Algorithm::Node *Algorithm::findNodeFromGrid(std::vector<int> grid)
     Node *act = _openList->node;
     while (act != NULL) {
         if (act->grid == grid) {
-            break;
+            return (act);
         }
         act = act->next;
     }
@@ -415,29 +575,36 @@ void Algorithm::deleteLastFromOpenList(Node *bestNode)
     // }
 }
 
+// void Algorithm::checkWhichConfig()
+// {
+//     int total = 0;
+//     for(int i = 0; i < _initialConfig.size(); i++) {
+//         int count = 0;
+//         for(int j = i; j < _initialConfig.size(); j++) {
+//             if (_initialConfig[i] > _initialConfig[j] && _initialConfig[j] != 0)
+//                 count++;
+//         }
+//         total += count;
+//     }
+//     total % 2 == 0 ? _finalConfig = fill_B_Config() : _finalConfig = fill_A_Config();
+// }
+
 void Algorithm::compute()
 {
     if (_n == 0 && _len == 0)
         return;
     // _initialConfig = createTab();
-    // _finalConfig = createTab();
-    _initialConfig.push_back(2);
+
+    _initialConfig.push_back(1);
+    _initialConfig.push_back(0);
     _initialConfig.push_back(3);
     _initialConfig.push_back(4);
-    _initialConfig.push_back(0);
-    _initialConfig.push_back(1);
-    _initialConfig.push_back(5);
+    _initialConfig.push_back(2);
     _initialConfig.push_back(6);
     _initialConfig.push_back(7);
-    _initialConfig.push_back(10);
-    _initialConfig.push_back(11);
-    _initialConfig.push_back(12);
+    _initialConfig.push_back(5);
     _initialConfig.push_back(8);
-    _initialConfig.push_back(9);
-    _initialConfig.push_back(13);
-    _initialConfig.push_back(14);
-    _initialConfig.push_back(15);
-    
+
     _finalConfig.push_back(1);
     _finalConfig.push_back(2);
     _finalConfig.push_back(3);
@@ -446,14 +613,9 @@ void Algorithm::compute()
     _finalConfig.push_back(6);
     _finalConfig.push_back(7);
     _finalConfig.push_back(8);
-    _finalConfig.push_back(9);
-    _finalConfig.push_back(10);
-    _finalConfig.push_back(11);
-    _finalConfig.push_back(12);
-    _finalConfig.push_back(13);
-    _finalConfig.push_back(14);
-    _finalConfig.push_back(15);
     _finalConfig.push_back(0);
+    
+    // checkWhichConfig();
 
     initList();
     writeFile(_initialConfig, "init");
@@ -478,7 +640,6 @@ void Algorithm::compute()
 
 void Algorithm::show(std::vector<int> tab)
 {
-    std::cout << "NOW configuration:" << std::endl;
     int i = 0;
     int biggest = 0;
 

@@ -1,0 +1,300 @@
+#include <chrono>
+#include <algorithm>
+#include <random>
+#include <sstream>
+#include <iostream>
+#include "State.hpp"
+
+State::State() {
+    tiles = nullptr;
+    previous = nullptr;
+    width = 0;
+    height = 0;
+    size = 0;
+    blank = {0, 0};
+}
+
+State::State(int w, int h) {
+    auto numbers = new int[w * h];
+    for (int i = 0; i < w * h; i++) {
+        numbers[i] = i;
+    }
+
+    long seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    std::shuffle(&numbers[0], &numbers[w * h], std::default_random_engine(seed));
+
+    *this = State(w, h, numbers);
+    delete[] numbers;
+}
+
+State::State(int w, int h, int* numbers) {
+    width = w;
+    height = h;
+    size = w * h;
+    previous = nullptr;
+
+    tiles = new int *[height];
+    for (int i = 0; i < height; i++) {
+        tiles[i] = new int[width];
+
+        for (int j = 0; j < width; j++) {
+            tiles[i][j] = numbers[i * width + j];
+
+            if (tiles[i][j] == 0) {
+                blank.height = i;
+                blank.width = j;
+            }
+        }
+    }
+}
+
+State::State(const State &s) {
+    width = s.width;
+    height = s.height;
+    size = s.size;
+    previous = s.previous;
+
+    blank = s.blank;
+    tiles = new int *[height];
+    for (int i = 0; i < height; i++) {
+        tiles[i] = new int[width];
+
+        for (int j = 0; j < width; j++) {
+            tiles[i][j] = s.tiles[i][j];
+        }
+    }
+}
+
+State::~State() {
+    delete[] tiles;
+}
+
+int **State::getTiles()
+{
+    return (this->tiles);
+}
+
+std::string State::toString() const {
+    long maxLength = std::to_string(size - 1).length();
+
+    std::stringstream out;
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            int num = tiles[i][j];
+            if (num == 0) {
+                for (int k = 0; k < maxLength; k++) {
+                    out << "_";
+                }
+                out << " ";
+            } else {
+                long numLength = std::to_string(num).length();
+                for (long k = numLength; k < maxLength; k++) {
+                    out << " ";
+                }
+                out << num << " ";
+            }
+        }
+        out << std::endl;
+    }
+    return out.str();
+}
+
+State &State::operator=(const State &o) {
+    width = o.width;
+    height = o.height;
+    size = o.size;
+    previous = o.previous;
+
+    blank = o.blank;
+    tiles = new int *[height];
+    for (int i = 0; i < height; i++) {
+        tiles[i] = new int[width];
+
+        for (int j = 0; j < width; j++) {
+            tiles[i][j] = o.tiles[i][j];
+        }
+    }
+
+    return *this;
+}
+
+bool State::isSolvable() {
+    int swaps = 0;
+    int flatTiles[size];
+
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            flatTiles[height * i + j] = tiles[i][j];
+        }
+    }
+
+    for (int i = 0; i < size; i++) {
+        int tile = flatTiles[i];
+        if (tile == 0) continue;
+
+        for (int j = i + 1; j < size; j++) {
+            int nextTile = flatTiles[j];
+            if (nextTile == 0) continue;
+
+            if (tile > nextTile) {
+                swaps++;
+            }
+        }
+    }
+
+    bool evenSwaps = swaps % 2 == 0;
+    bool blankOddRow = (height - blank.height) % 2 == 1;
+
+    // Giving credit where credit is due.
+    // http://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
+    return width == 0 ? blankOddRow == evenSwaps : evenSwaps;
+}
+
+bool State::isFinished() {
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            int expected = 1 + i * width + j;
+            int actual = tiles[i][j];
+
+            if (expected == size) {
+                if (actual != 0) {
+                    return false;
+                }
+            } else {
+                if (actual != expected) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+int State::manhattan() {
+    int score = 0;
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            int value = tiles[i][j];
+            int posX = value / width;
+            int posY = value % width;
+            score += abs(posX - i) + abs(posY - j);
+        }
+    }
+    return score;
+}
+
+int State::inPlace() {
+    int score = 0;
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            int value = tiles[i][j];
+            int expected = 1 + i * width + j;
+            if (value == expected || expected == size)
+                score++;
+        }
+    }
+    return score;
+}
+
+std::vector<State> State::expand() {
+    std::vector<State> children;
+
+    State s;
+    if (moveUp(s))
+        children.push_back(s);
+
+    if (moveDown(s))
+        children.push_back(s);
+
+    if (moveLeft(s))
+        children.push_back(s);
+
+    if (moveRight(s))
+        children.push_back(s);
+
+    return children;
+}
+
+/*
+ * Private Methods
+ */
+
+void State::moveBlank(Coords c) {
+    Coords moveFrom = blank;
+    blank.height += c.height;
+    blank.width += c.width;
+
+    int num = tiles[blank.height][blank.width];
+    tiles[moveFrom.height][moveFrom.width] = num;
+    tiles[blank.height][blank.width] = 0;
+}
+
+void State::moveX(int x) {
+    moveBlank({x, 0});
+}
+
+void State::moveY(int y) {
+    moveBlank({0, y});
+}
+
+bool State::moveUp(State &s) {
+    if (blank.height == 0) {
+        return false;
+    }
+
+    s = *this;
+    s.moveX(-1);
+    s.previous = new State(*this);
+    return true;
+}
+
+bool State::moveDown(State &s) {
+    if (blank.height == height - 1) {
+        return false;
+    }
+
+    s = *this;
+    s.moveX(+1);
+    s.previous = new State(*this);
+    return true;
+}
+
+bool State::moveLeft(State &s) {
+    if (blank.width == 0) {
+        return false;
+    }
+
+    s = *this;
+    s.moveY(-1);
+    s.previous = new State(*this);
+    return true;
+}
+
+bool State::moveRight(State &s) {
+    if (blank.width == width - 1) {
+        return false;
+    }
+
+    s = *this;
+    s.moveY(+1);
+    s.previous = new State(*this);
+    return true;
+}
+
+std::vector<std::string> State::getPath() {
+    if (previous == nullptr) {
+        return std::vector<std::string>();
+    }
+
+    std::vector<std::string> path;
+    path.emplace_back(toString());
+
+    State* ptr = previous;
+    do {
+        path.emplace_back(ptr->toString());
+        ptr = ptr->previous;
+    } while (ptr != nullptr);
+
+    std::reverse(path.begin(), path.end());
+    return path;
+}

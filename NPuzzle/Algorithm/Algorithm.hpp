@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <iomanip>
 #include <fstream>
+#include <chrono>
+#include "../State/DataStruct.hpp"
 
 class Algorithm
 {
@@ -49,7 +51,7 @@ class Algorithm
         int getDiff(std::vector<int> tab, std::vector<int> finalConfig);
         void possibility(std::vector<int> grid, int indexZero);
         void writeFile(std::vector<int> tab, std::string file);
-        void addToOpenList(std::vector<int> grid, Node *parent);
+        Node *addToOpenList(std::vector<int> grid, Node *parent);
         void addToCloseList(std::vector<int> grid, Node *parent);
         void initList();
         void deleteFromOpenList(Node *bestNode);
@@ -59,6 +61,11 @@ class Algorithm
         Node *getBestNode();
         int getParentCost(std::vector<int> tab);
         bool process(Algorithm::Node *node);
+        void showPath();
+        std::vector<int> convertToVector(int **tab);
+        // std::vector<int> fill_A_Config();
+        // std::vector<int> fill_B_Config();
+        // void checkWhichConfig();
 
     private:
         int _n = 0;
@@ -66,6 +73,8 @@ class Algorithm
         std::vector<int> _tab;
         std::vector<int> _initialConfig;
         std::vector<int> _finalConfig;
+        // std::vector<int> _A_finalConfig;
+        // std::vector<int> _B_finalConfig;
         STRAT _strategy = STRAT::INFORMED;
         std::vector<std::pair<int, int>> _indexAvailablePosition;
         int _iteration = 1;
