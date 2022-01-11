@@ -28,6 +28,40 @@ bool NQueens::IsAttacked(const State &state, int row)
     return IsAttacked(state, row, state[row]);
 }
 
+bool NQueens::IsBoardAttacked(const Board &board, int row, int col)
+{
+    for (int x = 0; x < _size; x++) {
+        if (x == col)
+            continue;
+        if (board[row][x] == QUEEN)
+            return true;
+    }
+
+    // left top
+    for (int x = row, y = col; x >= 0 && y >= 0; x--, y--) {
+        if (board[x][y] == QUEEN)
+            return true;
+    }
+    // left bot
+    for (int x = row, y = col; x < _size && y >= 0; x++, y--) {
+        if (board[x][y] == QUEEN)
+            return true;
+    }
+
+    // right top
+    for (int x = row, y = col; x >= 0 && y < _size; x--, y++) {
+        if (board[x][y] == QUEEN)
+            return true;
+    }
+    // right bot
+    for (int x = row, y = col; x < _size && y < _size; x++, y++) {
+        if (board[x][y] == QUEEN)
+            return true;
+    }
+
+    return false;
+}
+
 /******* LOCAL SEARCH ********/
 
 int NQueens::ComputeOptimumGoal(State &state)
@@ -88,6 +122,52 @@ void NQueens::LocalStrategy()
 
 ////////////////////////
 
+/******** UNINFORMED SEARCH ********/
+
+bool NQueens::SolveBoard(Board &board, int col)
+{
+    if (col >= _size)
+        return true;
+
+    for (int row = 0; row < _size; row++) {
+        if (IsBoardAttacked(board, row, col) == false) {
+            board[row][col] = QUEEN;
+            if (SolveBoard(board, col + 1))
+                return true;
+            board[row][col] = EMPTY;
+        }
+    }
+
+    return false;
+}
+
+State NQueens::ConvertBoardToState(const Board &board)
+{
+    State res(_size, 0);
+
+    for (int row = 0; row < _size; row++) {
+        for (int col = 0; col < _size; col++) {
+            if (board[row][col] == QUEEN) {
+                res[row] = col;
+                break;
+            }
+        }
+    }
+
+    return res;
+}
+
+void NQueens::UninformedStrategy()
+{
+    Board board(_size, State(_size, EMPTY));
+
+    SolveBoard(board, 0);
+
+    _state = ConvertBoardToState(board);
+}
+
+////////////////////////
+
 NQueens::NQueens(int size) : _size(size) {
     _state = State(size, 0);
     _initState = _state;
@@ -113,7 +193,7 @@ void NQueens::Compute(enum NQueens::Strat strat)
             std::cout << "INFORMED" << std::endl;
             break;
         case UNINFORMED:
-            // UninformedStrategy();
+            UninformedStrategy();
             break;
     }
 }

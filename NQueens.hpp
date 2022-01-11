@@ -20,6 +20,13 @@ public:
         LOCAL
     };
 
+    enum Tile : int
+    {
+        EMPTY,
+        QUEEN
+    };
+    
+
     NQueens(int size);
     
     void Reset(int newSize);
@@ -35,10 +42,17 @@ public:
     State GetState() const;
     void Compute(enum Strat strat);
 
+    // Local strat methods
     void LocalStrategy();
     void GetNeighbor(State &nState);
     int ComputeOptimumGoal(State &state);
-    
+
+    // uninformed strat
+    bool IsBoardAttacked(const Board &board, int row, int col);
+    void UninformedStrategy();
+    bool SolveBoard(Board &board, int col);
+    State ConvertBoardToState(const Board &board);
+
 private:
     int _size;
     State _state;

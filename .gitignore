@@ -2,3 +2,8 @@
 /a.out
 /test.cpp
 .vscode/
+
+/* these are test files */
+ls2.cpp
+uni_state.cpp
+cleanCode
