@@ -60,6 +60,7 @@ public:
     long long GetIterations() const;
     long long GetTime() const;
     State GetState() const;
+    long long GetNodeSize() const;
 
     // Utility Methods
     void PrintBoard();

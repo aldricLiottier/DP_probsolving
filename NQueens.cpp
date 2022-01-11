@@ -216,6 +216,9 @@ long long NQueens::GetTime() const
 State NQueens::GetState() const
 { return _state; }
 
+long long NQueens::GetNodeSize() const
+{ return 0; }
+
 /******** UTILITY METHODS ********/
 
 void NQueens::PrintBoard() {

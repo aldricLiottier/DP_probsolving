@@ -53,8 +53,8 @@ int main(int ac, char **av)
 
     // algo.Compute(NQueens::UNINFORMED);
     Board b(size, State(size, 0));
-    int sm = 2;
-    int strat = 1;
+    int sm = 0;
+    int strat = 2;
 
     std::cout << "Initial State :" << std::endl;
     printGrid(b);
