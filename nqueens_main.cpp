@@ -14,7 +14,10 @@ void printGrid(const Board &board)
 
     for (int y = 0; y < size; y++) {
         for (int x = 0; x < size; x++) {
-            std::cout << board[y][x] << " ";
+            if (board[y][x] == 1)
+                std::cout << "Q ";
+            else
+                std::cout << "_ ";
         }
         std::cout << std::endl;
     }
@@ -54,7 +57,7 @@ int main(int ac, char **av)
     // algo.Compute(NQueens::UNINFORMED);
     Board b(size, State(size, 0));
     int sm = 0;
-    int strat = 2;
+    int strat = 1;
 
     std::cout << "Initial State :" << std::endl;
     printGrid(b);
