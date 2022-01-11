@@ -50,7 +50,30 @@ void Algorithm::threadAlgo(std::vector<std::vector<int>> *grid, int *state, int 
 {
     tabGui = grid;
     this->state = state;
-    this->state = strat;
+
+    initList();
+    std::vector<int> tab;
+    for(auto vec: *grid) {
+        for(auto nb: vec) {
+            tab.push_back(nb);
+        }
+    }
+    _initialConfig = tab;
+    _tab = _initialConfig;
+    writeFile(_initialConfig, "init");
+    switch (_strategy) {
+        case STRAT::INFORMED:
+            informedAlgo();
+            break;
+        case STRAT::UNIFORMED:
+            uninformedAlgo();
+            break;
+        case STRAT::LOCAL:
+            localAlgo();
+            break;
+        default:
+            break;
+    }
 }
 
 std::vector<int> Algorithm::convertIntToVector(int **tab)
@@ -626,25 +649,25 @@ void Algorithm::compute()
         return;
     // _initialConfig = createTab();
 
-    _initialConfig.push_back(1);
-    _initialConfig.push_back(0);
-    _initialConfig.push_back(3);
-    _initialConfig.push_back(4);
-    _initialConfig.push_back(2);
-    _initialConfig.push_back(6);
-    _initialConfig.push_back(7);
-    _initialConfig.push_back(5);
-    _initialConfig.push_back(8);
+    // _initialConfig.push_back(1);
+    // _initialConfig.push_back(0);
+    // _initialConfig.push_back(3);
+    // _initialConfig.push_back(4);
+    // _initialConfig.push_back(2);
+    // _initialConfig.push_back(6);
+    // _initialConfig.push_back(7);
+    // _initialConfig.push_back(5);
+    // _initialConfig.push_back(8);
 
-    _finalConfig.push_back(1);
-    _finalConfig.push_back(2);
-    _finalConfig.push_back(3);
-    _finalConfig.push_back(4);
-    _finalConfig.push_back(5);
-    _finalConfig.push_back(6);
-    _finalConfig.push_back(7);
-    _finalConfig.push_back(8);
-    _finalConfig.push_back(0);
+    // _finalConfig.push_back(1);
+    // _finalConfig.push_back(2);
+    // _finalConfig.push_back(3);
+    // _finalConfig.push_back(4);
+    // _finalConfig.push_back(5);
+    // _finalConfig.push_back(6);
+    // _finalConfig.push_back(7);
+    // _finalConfig.push_back(8);
+    // _finalConfig.push_back(0);
     
     // checkWhichConfig();
 
@@ -665,7 +688,7 @@ void Algorithm::compute()
             break;
         default:
             break;
-        }
+    }
     
 }
 
