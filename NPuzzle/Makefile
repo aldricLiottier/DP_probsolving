@@ -1,6 +1,6 @@
 SRC 	= 	main.cpp \
 			Algorithm/Algorithm.cpp \
-			State/State.cpp
+			SNode/SNode.cpp
 
 OBJ		=	$(SRC:.cpp=.o)
 

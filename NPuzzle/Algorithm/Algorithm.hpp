@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <fstream>
 #include <chrono>
-#include "../State/DataStruct.hpp"
+#include "../SNode/DataStruct.hpp"
 
 class Algorithm
 {
@@ -63,8 +63,8 @@ class Algorithm
         int getParentCost(std::vector<int> tab);
         bool process(Algorithm::Node *node);
         void showPath();
-        std::vector<int> convertToVector(int **tab);
-        std::vector<std::vector<int>> convertVector(std::vector<int> grid);
+        std::vector<int> convertIntToVector(int **tab);
+        std::vector<std::vector<int>> convertVectorToVector(std::vector<int> grid);
         // std::vector<int> fill_A_Config();
         // std::vector<int> fill_B_Config();
         // void checkWhichConfig();
@@ -86,4 +86,6 @@ class Algorithm
         List *_closeList;
         std::vector<std::vector<int>> _activeQueue;
         std::vector<std::vector<int>> _inactiveQueue;
+
+        // std::vector<std::vector<int>> &refGui;
 };

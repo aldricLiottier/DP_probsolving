@@ -48,7 +48,7 @@ void threadAlgo(std::vector<std::vector<int>> &grid, int &state, int &strat)
 
 }
 
-std::vector<int> Algorithm::convertToVector(int **tab)
+std::vector<int> Algorithm::convertIntToVector(int **tab)
 {
     std::vector<int> table;
 
@@ -57,9 +57,10 @@ std::vector<int> Algorithm::convertToVector(int **tab)
             table.push_back(tab[i][j]);
         }
     }
+    return (table);
 }
 
-std::vector<std::vector<int>> Algorithm::convertVector(std::vector<int> grid)
+std::vector<std::vector<int>> Algorithm::convertVectorToVector(std::vector<int> grid)
 {
     std::vector<std::vector<int>> tab;
     int i = 0;
@@ -231,7 +232,7 @@ int algoProcess(SNode &finalNode, std::set<SNode> &closedNode, T &list) {
     int iter = 0;
     while (!list.empty()) {
         SNode next = list.top();
-        convertToVector(next.getTiles()); // SEND TO GUI
+        // convertIntToVector(next.getTiles()); // SEND TO GUI
         list.pop();
         if (next.isFinished()) {
             finalNode = next;
