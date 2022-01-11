@@ -45,7 +45,7 @@ int Algorithm::randomInt(std::vector<int> tab)
 
 void threadAlgo(std::vector<std::vector<int>> &grid, int &state, int &strat)
 {
-    
+
 }
 
 std::vector<int> Algorithm::convertToVector(int **tab)
@@ -227,39 +227,34 @@ Algorithm::Node *Algorithm::getBestNode()
 // }
 
 template<typename T>
-int search(State &solution, std::set<State> &closed, T &agenda) {
+int algoProcess(SNode &finalNode, std::set<SNode> &closedNode, T &list) {
     int iter = 0;
-    while (!agenda.empty()) {
-        State next = agenda.top();
+    while (!list.empty()) {
+        SNode next = list.top();
         convertToVector(next.getTiles()); // SEND TO GUI
-        agenda.pop();
-
+        list.pop();
         if (next.isFinished()) {
-            solution = next;
+            finalNode = next;
             return iter;
         }
-
-        if (closed.empty() || closed.find(next) == closed.end()) {
-            closed.insert(next);
-
-            std::vector<State> children = next.expand();
-            for (State &s : children) {
-                agenda.push(s);
+        if (closedNode.empty() || closedNode.find(next) == closedNode.end()) {
+            closedNode.insert(next);
+            std::vector<SNode> children = next.expand();
+            for (SNode &s : children) {
+                list.push(s);
             }
         }
-
         iter++;
     }
-
     return -1;
 }
 
-int dfs(State &solution, std::set<State> &closed, std::stack<State> &agenda) {
-    return search(solution, closed, agenda);
+int depthFirstSearch(SNode &finalNode, std::set<SNode> &closedNode, std::stack<SNode> &list) {
+    return algoProcess(finalNode, closedNode, list);
 }
 
-int bestfs(State &solution, std::set<State> &closed, my_priority_queue &agenda) {
-    return search(solution, closed, agenda);
+int bestFirstSearch(SNode &finalNode, std::set<SNode> &closedNode, OwnPrioQueue &list) {
+    return algoProcess(finalNode, closedNode, list);
 }
 
 // void Algorithm::informedAlgo()
@@ -284,22 +279,22 @@ int bestfs(State &solution, std::set<State> &closed, my_priority_queue &agenda) 
 
 void Algorithm::informedAlgo() // Best First search algorithm
 {
-    bool ok = false;
-    State start;
-    while (!ok) {
-        start = State(_len, _len);
-        ok = start.isSolvable();
+    bool solvable = false;
+    SNode start;
+    while (!solvable) {
+        start = SNode(_len, _len);
+        solvable = start.isSolvable();
     }
     std::cout << "Initial Config: " << std::endl << start.toString() << std::endl;
 
     int iterations;
     auto time0 = std::chrono::high_resolution_clock::now();
-    State end;
-    std::set<State> closedSet;
+    SNode end;
+    std::set<SNode> closedSet;
 
-    my_priority_queue agenda;
+    OwnPrioQueue agenda;
     agenda.push(start);
-    iterations = bestfs(end, closedSet, agenda);
+    iterations = bestFirstSearch(end, closedSet, agenda);
 
     if (iterations > 0) {
         auto time1 = std::chrono::high_resolution_clock::now();
@@ -355,21 +350,21 @@ void Algorithm::informedAlgo() // Best First search algorithm
 void Algorithm::uninformedAlgo() // Depth first search algorithm
 {
     bool ok = false;
-    State start;
+    SNode start;
     while (!ok) {
-        start = State(_len, _len);
+        start = SNode(_len, _len);
         ok = start.isSolvable();
     }
     std::cout << "Initial Config: " << std::endl << start.toString() << std::endl;
 
     int iterations;
     auto time0 = std::chrono::high_resolution_clock::now();
-    State end;
-    std::set<State> closedSet;
+    SNode end;
+    std::set<SNode> closedSet;
 
-    std::stack<State> agenda;
+    std::stack<SNode> agenda;
     agenda.push(start);
-    iterations = dfs(end, closedSet, agenda);
+    iterations = depthFirstSearch(end, closedSet, agenda);
 
     if (iterations > 0) {
         auto time1 = std::chrono::high_resolution_clock::now();

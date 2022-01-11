@@ -9,12 +9,12 @@ struct Coords {
     int height, width;
 };
 
-class State {
+class SNode {
     private:
         int **tiles;
         Coords blank;
         int width, height, size;
-        State* previous;
+        SNode* previous;
 
         void moveBlank(Coords c);
 
@@ -22,31 +22,31 @@ class State {
 
         void moveY(int);
 
-        bool moveUp(State &);
+        bool moveUp(SNode &);
 
-        bool moveDown(State &);
+        bool moveDown(SNode &);
 
-        bool moveLeft(State &);
+        bool moveLeft(SNode &);
 
-        bool moveRight(State &);
+        bool moveRight(SNode &);
 
     public:
 
-        State();
+        SNode();
 
-        State(int, int);
+        SNode(int, int);
 
-        State(int, int, int*);
+        SNode(int, int, int*);
 
-        State(const State &);
+        SNode(const SNode &);
 
-        ~State();
+        ~SNode();
 
         int **getTiles();
 
-        State &operator=(const State &);
+        SNode &operator=(const SNode &);
 
-        friend bool operator<(const State &a, const State &b) {
+        friend bool operator<(const SNode &a, const SNode &b) {
             return a.toString() < b.toString();
         }
 
@@ -60,7 +60,7 @@ class State {
 
         std::string toString() const;
 
-        std::vector<State> expand();
+        std::vector<SNode> expand();
 
         std::vector<std::string> getPath();
 };

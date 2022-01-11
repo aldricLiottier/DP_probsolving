@@ -5,22 +5,22 @@
 #include <queue>
 #include <set>
 #include <stack>
-#include "State.hpp"
+#include "SNode.hpp"
 
-struct compareStates {
-    bool operator()(State &a, State &b) {
+struct compareSNodes {
+    bool operator()(SNode &a, SNode &b) {
         return a.inPlace() < b.inPlace();
     }
 };
 
-class my_queue : public std::queue<State> {
+class my_queue : public std::queue<SNode> {
 public:
-    State top() {
+    SNode top() {
         return front();
     }
 };
 
-class my_priority_queue : public std::priority_queue<State, std::vector<State>, compareStates> {
+class OwnPrioQueue : public std::priority_queue<SNode, std::vector<SNode>, compareSNodes> {
 };
 
 #endif //AI1_DATASTRUCTS_H

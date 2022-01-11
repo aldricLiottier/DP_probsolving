@@ -3,9 +3,9 @@
 #include <random>
 #include <sstream>
 #include <iostream>
-#include "State.hpp"
+#include "SNode.hpp"
 
-State::State() {
+SNode::SNode() {
     tiles = nullptr;
     previous = nullptr;
     width = 0;
@@ -14,7 +14,7 @@ State::State() {
     blank = {0, 0};
 }
 
-State::State(int w, int h) {
+SNode::SNode(int w, int h) {
     auto numbers = new int[w * h];
     for (int i = 0; i < w * h; i++) {
         numbers[i] = i;
@@ -23,11 +23,11 @@ State::State(int w, int h) {
     long seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
     std::shuffle(&numbers[0], &numbers[w * h], std::default_random_engine(seed));
 
-    *this = State(w, h, numbers);
+    *this = SNode(w, h, numbers);
     delete[] numbers;
 }
 
-State::State(int w, int h, int* numbers) {
+SNode::SNode(int w, int h, int* numbers) {
     width = w;
     height = h;
     size = w * h;
@@ -48,7 +48,7 @@ State::State(int w, int h, int* numbers) {
     }
 }
 
-State::State(const State &s) {
+SNode::SNode(const SNode &s) {
     width = s.width;
     height = s.height;
     size = s.size;
@@ -65,16 +65,16 @@ State::State(const State &s) {
     }
 }
 
-State::~State() {
+SNode::~SNode() {
     delete[] tiles;
 }
 
-int **State::getTiles()
+int **SNode::getTiles()
 {
     return (this->tiles);
 }
 
-std::string State::toString() const {
+std::string SNode::toString() const {
     long maxLength = std::to_string(size - 1).length();
 
     std::stringstream out;
@@ -99,7 +99,7 @@ std::string State::toString() const {
     return out.str();
 }
 
-State &State::operator=(const State &o) {
+SNode &SNode::operator=(const SNode &o) {
     width = o.width;
     height = o.height;
     size = o.size;
@@ -118,7 +118,7 @@ State &State::operator=(const State &o) {
     return *this;
 }
 
-bool State::isSolvable() {
+bool SNode::isSolvable() {
     int swaps = 0;
     int flatTiles[size];
 
@@ -145,12 +145,10 @@ bool State::isSolvable() {
     bool evenSwaps = swaps % 2 == 0;
     bool blankOddRow = (height - blank.height) % 2 == 1;
 
-    // Giving credit where credit is due.
-    // http://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
     return width == 0 ? blankOddRow == evenSwaps : evenSwaps;
 }
 
-bool State::isFinished() {
+bool SNode::isFinished() {
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             int expected = 1 + i * width + j;
@@ -170,7 +168,7 @@ bool State::isFinished() {
     return true;
 }
 
-int State::manhattan() {
+int SNode::manhattan() {
     int score = 0;
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
@@ -183,7 +181,7 @@ int State::manhattan() {
     return score;
 }
 
-int State::inPlace() {
+int SNode::inPlace() {
     int score = 0;
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
@@ -196,10 +194,10 @@ int State::inPlace() {
     return score;
 }
 
-std::vector<State> State::expand() {
-    std::vector<State> children;
+std::vector<SNode> SNode::expand() {
+    std::vector<SNode> children;
 
-    State s;
+    SNode s;
     if (moveUp(s))
         children.push_back(s);
 
@@ -215,11 +213,7 @@ std::vector<State> State::expand() {
     return children;
 }
 
-/*
- * Private Methods
- */
-
-void State::moveBlank(Coords c) {
+void SNode::moveBlank(Coords c) {
     Coords moveFrom = blank;
     blank.height += c.height;
     blank.width += c.width;
@@ -229,59 +223,59 @@ void State::moveBlank(Coords c) {
     tiles[blank.height][blank.width] = 0;
 }
 
-void State::moveX(int x) {
+void SNode::moveX(int x) {
     moveBlank({x, 0});
 }
 
-void State::moveY(int y) {
+void SNode::moveY(int y) {
     moveBlank({0, y});
 }
 
-bool State::moveUp(State &s) {
+bool SNode::moveUp(SNode &s) {
     if (blank.height == 0) {
         return false;
     }
 
     s = *this;
     s.moveX(-1);
-    s.previous = new State(*this);
+    s.previous = new SNode(*this);
     return true;
 }
 
-bool State::moveDown(State &s) {
+bool SNode::moveDown(SNode &s) {
     if (blank.height == height - 1) {
         return false;
     }
 
     s = *this;
     s.moveX(+1);
-    s.previous = new State(*this);
+    s.previous = new SNode(*this);
     return true;
 }
 
-bool State::moveLeft(State &s) {
+bool SNode::moveLeft(SNode &s) {
     if (blank.width == 0) {
         return false;
     }
 
     s = *this;
     s.moveY(-1);
-    s.previous = new State(*this);
+    s.previous = new SNode(*this);
     return true;
 }
 
-bool State::moveRight(State &s) {
+bool SNode::moveRight(SNode &s) {
     if (blank.width == width - 1) {
         return false;
     }
 
     s = *this;
     s.moveY(+1);
-    s.previous = new State(*this);
+    s.previous = new SNode(*this);
     return true;
 }
 
-std::vector<std::string> State::getPath() {
+std::vector<std::string> SNode::getPath() {
     if (previous == nullptr) {
         return std::vector<std::string>();
     }
@@ -289,7 +283,7 @@ std::vector<std::string> State::getPath() {
     std::vector<std::string> path;
     path.emplace_back(toString());
 
-    State* ptr = previous;
+    SNode* ptr = previous;
     do {
         path.emplace_back(ptr->toString());
         ptr = ptr->previous;
