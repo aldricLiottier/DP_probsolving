@@ -40,7 +40,7 @@ class Algorithm
         void showFinalConfig();
         void show(std::vector<int> tab);
         void showList();
-        void threadAlgo(std::vector<std::vector<int>> &grid, int &state, int &strat);
+        void threadAlgo(std::vector<std::vector<int>> *grid, int &state, int &strat);
     private:
         std::vector<int> createTab();
         void localAlgo();
@@ -87,5 +87,5 @@ class Algorithm
         std::vector<std::vector<int>> _activeQueue;
         std::vector<std::vector<int>> _inactiveQueue;
 
-        // std::vector<std::vector<int>> &refGui;
+        std::vector<std::vector<int>> *tabGui;
 };

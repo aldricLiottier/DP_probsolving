@@ -14,6 +14,7 @@ Algorithm::Algorithm(int n, STRAT strat)
 
     // _A_finalConfig = fill_A_Config();
     // _B_finalConfig = fill_B_Config();
+    tabGui = NULL;
 }
 
 Algorithm::~Algorithm()
@@ -43,9 +44,9 @@ int Algorithm::randomInt(std::vector<int> tab)
     return (rand);
 }
 
-void threadAlgo(std::vector<std::vector<int>> &grid, int &state, int &strat)
+void Algorithm::threadAlgo(std::vector<std::vector<int>> *grid, int &state, int &strat)
 {
-
+    tabGui = grid;
 }
 
 std::vector<int> Algorithm::convertIntToVector(int **tab)
@@ -283,8 +284,8 @@ void Algorithm::informedAlgo() // Best First search algorithm
     bool solvable = false;
     SNode start;
     while (!solvable) {
-        start = SNode(_len, _len);
-        solvable = start.isSolvable();
+        start = SNode(_len, _len, *tabGui);
+        solvable = start.canBeDone();
     }
     std::cout << "Initial Config: " << std::endl << start.toString() << std::endl;
 
@@ -353,8 +354,8 @@ void Algorithm::uninformedAlgo() // Depth first search algorithm
     bool ok = false;
     SNode start;
     while (!ok) {
-        start = SNode(_len, _len);
-        ok = start.isSolvable();
+        start = SNode(_len, _len, *tabGui);
+        ok = start.canBeDone();
     }
     std::cout << "Initial Config: " << std::endl << start.toString() << std::endl;
 

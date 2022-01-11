@@ -14,14 +14,18 @@ SNode::SNode() {
     blank = {0, 0};
 }
 
-SNode::SNode(int w, int h) {
+SNode::SNode(int w, int h, std::vector<std::vector<int>> grid) {
     auto numbers = new int[w * h];
-    for (int i = 0; i < w * h; i++) {
-        numbers[i] = i;
+    int k = 0;
+    for (int i = 0; i < w; i++) {
+        for (int j = 0; j < h; j++) {
+            numbers[k] = grid[i][j];
+            k++;
+        }
     }
 
-    long seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-    std::shuffle(&numbers[0], &numbers[w * h], std::default_random_engine(seed));
+    // long seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    // std::shuffle(&numbers[0], &numbers[w * h], std::default_random_engine(seed));
 
     *this = SNode(w, h, numbers);
     delete[] numbers;
@@ -118,7 +122,7 @@ SNode &SNode::operator=(const SNode &o) {
     return *this;
 }
 
-bool SNode::isSolvable() {
+bool SNode::canBeDone() {
     int swaps = 0;
     int flatTiles[size];
 

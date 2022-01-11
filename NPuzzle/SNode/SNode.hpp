@@ -34,7 +34,7 @@ class SNode {
 
         SNode();
 
-        SNode(int, int);
+        SNode(int, int, std::vector<std::vector<int>>);
 
         SNode(int, int, int*);
 
@@ -50,7 +50,7 @@ class SNode {
             return a.toString() < b.toString();
         }
 
-        bool isSolvable();
+        bool canBeDone();
 
         bool isFinished();
 
