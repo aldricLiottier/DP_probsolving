@@ -8,6 +8,18 @@
 #define ARGUMENT_ERROR -1
 #define ERROR 84
 
+void printGrid(const Board &board)
+{
+    int size = board.size();
+
+    for (int y = 0; y < size; y++) {
+        for (int x = 0; x < size; x++) {
+            std::cout << board[y][x] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
 int check_args(int ac, char **av)
 {
     int size = 0;
@@ -39,9 +51,20 @@ int main(int ac, char **av)
 
     NQueens algo(size);
 
-    algo.Compute(NQueens::UNINFORMED);
+    // algo.Compute(NQueens::UNINFORMED);
+    Board b(size, State(size, 0));
+    int sm = 2;
+    int strat = 1;
 
-    algo.PrintBoard();
+    std::cout << "Initial State :" << std::endl;
+    printGrid(b);
+    algo.threadAlgo(&b, &sm, &strat);
+
+    // algo.PrintBoard();
+    std::cout << "Final State :" << std::endl;
+    printGrid(b);
+    std::cout << "Iterations    : " << algo.GetIterations() << std::endl;
+    std::cout << "Time          : " << algo.GetTime() << " ms" << std::endl;
 
     return 0;
 }

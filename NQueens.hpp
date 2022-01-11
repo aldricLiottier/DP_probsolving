@@ -6,6 +6,8 @@
 #define DP_PROBSOLVING_NQUEENS_HPP
 
 #include <vector>
+#include <mutex>
+#include <thread>
 
 typedef std::vector<std::vector<int>> Board;
 typedef std::vector<int> State;
@@ -13,7 +15,16 @@ typedef std::vector<int> State;
 class NQueens
 {
 public:
-    enum Strat
+
+    struct Node
+    {
+        std::vector<int> state;
+        int score;
+        Node *parent;
+        Node *next;
+    };
+
+    enum Strat : int
     {
         INFORMED,
         UNINFORMED,
@@ -29,6 +40,8 @@ public:
 
     NQueens(int size);
     
+    void threadAlgo(std::vector<std::vector<int>> *grid, int *solvingMethod, int *strat);
+
     void Reset(int newSize);
     void PrintBoard();
     
@@ -44,21 +57,34 @@ public:
 
     // Local strat methods
     void LocalStrategy();
-    void GetNeighbor(State &nState);
-    int ComputeOptimumGoal(State &state);
+    void SetNeighbor(State &nState);
+    int ComputeOptimalGoal(State &state);
 
     // uninformed strat
     bool IsBoardAttacked(const Board &board, int row, int col);
     void UninformedStrategy();
     bool SolveBoard(Board &board, int col);
     State ConvertBoardToState(const Board &board);
+    Board ConvertStateToBoard(const State &state);
+    void SetInputGrid(std::vector<std::vector<int>> *grid);
+
+    long long GetIterations() const;
+    long long GetTime() const;
 
 private:
+    int _solvingMethod;
     int _size;
-    State _state;
 
+    long long _iterations;
+    long long _timer;
+
+    State _state;
     State _initState;
-//    Board _board;
+
+    Board *_grid;
+    Board _initGrid;
+
+    std::mutex _algoMutex;
 };
 
 #endif //DP_PROBSOLVING_NQUEENS_HPP
