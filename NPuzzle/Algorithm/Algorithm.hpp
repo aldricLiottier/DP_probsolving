@@ -64,7 +64,7 @@ class Algorithm
         bool process(Algorithm::Node *node);
         void showPath();
         std::vector<int> convertToVector(int **tab);
-        std::vector<std::vector<int>> convertVector(std::vector<int> grid)
+        std::vector<std::vector<int>> convertVector(std::vector<int> grid);
         // std::vector<int> fill_A_Config();
         // std::vector<int> fill_B_Config();
         // void checkWhichConfig();

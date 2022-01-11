@@ -10,70 +10,59 @@ struct Coords {
 };
 
 class State {
-private:
-    int **tiles;
-    Coords blank;
-    int width, height, size;
-    State* previous;
+    private:
+        int **tiles;
+        Coords blank;
+        int width, height, size;
+        State* previous;
 
-    void moveBlank(Coords c);
+        void moveBlank(Coords c);
 
-    void moveX(int);
+        void moveX(int);
 
-    void moveY(int);
+        void moveY(int);
 
-    bool moveUp(State &);
+        bool moveUp(State &);
 
-    bool moveDown(State &);
+        bool moveDown(State &);
 
-    bool moveLeft(State &);
+        bool moveLeft(State &);
 
-    bool moveRight(State &);
+        bool moveRight(State &);
 
-public:
-    /*
-     * Constructors, destructors etc.
-     */
+    public:
 
-    State();
+        State();
 
-    State(int, int);
+        State(int, int);
 
-    State(int, int, int*);
+        State(int, int, int*);
 
-    State(const State &);
+        State(const State &);
 
-    ~State();
+        ~State();
 
-    int **getTiles();
+        int **getTiles();
 
-    /*
-     * Operator overloads.
-     */
+        State &operator=(const State &);
 
-    State &operator=(const State &);
+        friend bool operator<(const State &a, const State &b) {
+            return a.toString() < b.toString();
+        }
 
-    friend bool operator<(const State &a, const State &b) {
-        return a.toString() < b.toString();
-    }
+        bool isSolvable();
 
-    /*
-     * Other methods.
-     */
+        bool isFinished();
 
-    bool isSolvable();
+        int manhattan();
 
-    bool isFinished();
+        int inPlace();
 
-    int manhattan();
+        std::string toString() const;
 
-    int inPlace();
+        std::vector<State> expand();
 
-    std::string toString() const;
-
-    std::vector<State> expand();
-
-    std::vector<std::string> getPath();
+        std::vector<std::string> getPath();
 };
 
 
