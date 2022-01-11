@@ -48,6 +48,7 @@ int Algorithm::randomInt(std::vector<int> tab)
 
 void Algorithm::threadAlgo(std::vector<std::vector<int>> *grid, int *state, int *strat)
 {
+    auto time0 = std::chrono::high_resolution_clock::now();
     tabGui = grid;
     this->state = state;
 
@@ -74,6 +75,8 @@ void Algorithm::threadAlgo(std::vector<std::vector<int>> *grid, int *state, int 
         default:
             break;
     }
+    auto time1 = std::chrono::high_resolution_clock::now();
+    this->ms = std::chrono::duration_cast<std::chrono::milliseconds>(time1 - time0).count();
 }
 
 std::vector<int> Algorithm::convertIntToVector(int **tab)
@@ -322,7 +325,7 @@ void Algorithm::informedAlgo() // Best First search algorithm
     std::cout << "Initial Config: " << std::endl << start.toString() << std::endl;
 
     int iterations;
-    auto time0 = std::chrono::high_resolution_clock::now();
+    // auto time0 = std::chrono::high_resolution_clock::now();
     SNode end;
     std::set<SNode> closedSet;
 
@@ -331,11 +334,13 @@ void Algorithm::informedAlgo() // Best First search algorithm
     iterations = bestFirstSearch(end, closedSet, agenda);
 
     if (iterations > 0) {
-        auto time1 = std::chrono::high_resolution_clock::now();
-        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(time1 - time0).count();
+        // auto time1 = std::chrono::high_resolution_clock::now();
+        // auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(time1 - time0).count();
 
         std::cout << "Solution:" << std::endl;
         std::vector<std::string> path = end.getPath();
+        this->iteration = iterations;
+        this->nodeSize = path.size();
         for (std::string &s : end.getPath()) {
             std::cout << s << std::endl;
         }
@@ -345,6 +350,21 @@ void Algorithm::informedAlgo() // Best First search algorithm
     } else {
         std::cout << "No solution!" << std::endl;
     }
+}
+
+long long Algorithm::getTime()
+{
+    return (ms);
+}
+
+long long Algorithm::getNodeSize()
+{
+    return (nodeSize);
+}
+
+long long Algorithm::getIteration()
+{
+    return (iteration);
 }
 
 // void Algorithm::uninformedAlgo() // Depth-first search algorithm
@@ -393,6 +413,7 @@ void Algorithm::uninformedAlgo() // Depth first search algorithm
 
     int iterations;
     auto time0 = std::chrono::high_resolution_clock::now();
+    
     SNode end;
     std::set<SNode> closedSet;
 
@@ -409,6 +430,8 @@ void Algorithm::uninformedAlgo() // Depth first search algorithm
         for (std::string &s : end.getPath()) {
             std::cout << s << std::endl;
         }
+        this->iteration = iterations;
+        this->nodeSize = path.size();
 
         std::cout << "Completed in " << path.size() - 1 << " steps." << std::endl
                   << iterations << " iterations / " << ms << "ms" << std::endl;

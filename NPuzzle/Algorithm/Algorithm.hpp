@@ -76,6 +76,9 @@ class Algorithm
         // std::vector<int> fill_A_Config();
         // std::vector<int> fill_B_Config();
         // void checkWhichConfig();
+        long long getTime();
+        long long getNodeSize();
+        long long getIteration();
 
     private:
         int _n = 0;
@@ -99,4 +102,7 @@ class Algorithm
         int *state;
         int *strat;
         std::mutex _algoMutex;
+        long long ms;
+        long long nodeSize;
+        long long iteration;
 };
