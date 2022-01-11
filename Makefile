@@ -4,6 +4,10 @@ LDFLAGS = -lsfml-graphics -lsfml-window -lsfml-system
 SRC	=	main.cpp	\
 		text.cpp	\
 		image.cpp	\
+		SNode.cpp	\
+		Algorithm.cpp	\
+		NQueens.cpp	\
+
 
 Name = gui
 

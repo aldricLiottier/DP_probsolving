@@ -1,9 +1,28 @@
-#include "text.hpp"
+#include "iostream"
+#include "gui.hpp"
 
-textsf::textsf(std::string content, sf::RenderWindow *windows, textsf *firsty) : text(), pos(20, 20)
+textsf::textsf(std::string content, sf::RenderWindow *windows, textsf *firsty) : text(), pos(20, 20), textcontent(content)
 {
     window = windows;
-    first = firsty;
+    if (content != "informed search" && content != "uninformed search" && content != "local search" &&
+        content != "one step" && content != "full solve" && content != "reset") {
+        algochoice = new textsf("informed search", windows, nullptr);
+        algochoice->first = algochoice;
+        algochoice->currenttxt = algochoice;
+        algochoice->newfoltext("uninformed search", nullptr);
+        algochoice->newfoltext("local search", nullptr);
+    } else if (content != "one step" && content != "full solve" && content != "reset" &&
+                content != "8-puzzle" && content != "24-puzzle" && content != "20-Queens" && content != "1000000-Queens") {
+        algochoice = new textsf("one step", windows, nullptr);
+        algochoice->first = algochoice;
+        algochoice->currenttxt = algochoice;
+        algochoice->newfoltext("full solve", nullptr);
+        algochoice->newfoltext("reset", nullptr);
+    }
+    if (firsty == nullptr)
+        first = this;
+    else 
+        first = firsty;
     currenttxt = first;
     if (!font.loadFromFile("KIMONOK_.ttf"))
     {
@@ -29,44 +48,80 @@ textsf::textsf(std::string content, sf::RenderWindow *windows, textsf *firsty) :
     window->draw(text);
 }
 
+void textsf::setState()
+{
+    if (currenttxt->currentinuse == 1) {
+        if (currenttxt->algochoice != nullptr)
+            currenttxt->algochoice->setState();
+    }
+    currenttxt->currentinuse = 1;
+}
+
+bool textsf::unsetState()
+{
+    bool done = 0;
+    if (currenttxt->algochoice != nullptr) {
+        done = currenttxt->algochoice->unsetState();
+    }
+    if (currenttxt->currentinuse == 1 && done != 1) {
+        currenttxt->currentinuse = 0;
+        return 1;
+    } else
+        return 0;
+}
+
 void textsf::textsfDown()
 {
-    if (currenttxt->next != nullptr) {
-        currenttxt->text.setFillColor(sf::Color::White);
-        currenttxt = currenttxt->next;
-        currenttxt->text.setFillColor(sf::Color::Red);
+    if (currenttxt->currentinuse == 0) {
+        if (currenttxt->next != nullptr) {
+            currenttxt->text.setFillColor(sf::Color::White);
+            currenttxt = currenttxt->next;
+            currenttxt->text.setFillColor(sf::Color::Red);
+        } else {
+            currenttxt->text.setFillColor(sf::Color::White);
+            currenttxt = first;
+            currenttxt->text.setFillColor(sf::Color::Red);
+        }
     } else {
-        currenttxt->text.setFillColor(sf::Color::White);
-        currenttxt = first;
-        currenttxt->text.setFillColor(sf::Color::Red);
+        currenttxt->algochoice->textsfDown();
     }
 }
 
 void textsf::textsfUp()
 {
-    if (currenttxt->prev != nullptr) {
-        currenttxt->text.setFillColor(sf::Color::White);
-        currenttxt = currenttxt->prev;
-        currenttxt->text.setFillColor(sf::Color::Red);
-    } else {
-        currenttxt->text.setFillColor(sf::Color::White);
-        while (currenttxt->next != nullptr)
-        {
-            currenttxt = currenttxt->next;
+    if (currenttxt->currentinuse == 0) {
+        if (currenttxt->prev != nullptr) {
+            currenttxt->text.setFillColor(sf::Color::White);
+            currenttxt = currenttxt->prev;
+            currenttxt->text.setFillColor(sf::Color::Red);
+        } else {
+            currenttxt->text.setFillColor(sf::Color::White);
+            while (currenttxt->next != nullptr)
+            {
+                currenttxt = currenttxt->next;
+            }
+            currenttxt->text.setFillColor(sf::Color::Red);
         }
-        currenttxt->text.setFillColor(sf::Color::Red);
+    } else {
+        currenttxt->algochoice->textsfUp();
     }
 }
 
 textsf::textsf()
-{}
+{
+
+}
 
 void textsf::drawall()
 {
-    text.setPosition(pos);
-    window->draw(text);
-    if (next != nullptr) {
-        next->drawall();
+    if (currenttxt->currentinuse == 0) {
+        text.setPosition(pos);
+        window->draw(text);
+        if (next != nullptr) {
+            next->drawall();
+        }
+    } else {
+        currenttxt->algochoice->drawall();
     }
 
 }

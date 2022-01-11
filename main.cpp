@@ -1,8 +1,32 @@
 #include "main.hpp"
+#include <iostream>
+#include <fstream>
 
-bool eventloop(sf::RenderWindow &window, textsf &textbar)
+Algorithm::STRAT returnstrat(textsf *textbar)
+{
+    if (textbar->currenttxt->algochoice->currenttxt->textcontent == "uninformed search") {
+        return Algorithm::UNIFORMED;
+    } else if (textbar->currenttxt->algochoice->currenttxt->textcontent == "local search") {
+        return Algorithm::LOCAL;
+    } else
+        return Algorithm::INFORMED;
+}
+
+int returnstateur(textsf *textbar)
+{
+    if (textbar->currenttxt->algochoice->currenttxt->algochoice->currenttxt->textcontent == "one step") {
+        return 1;
+    } else if (textbar->currenttxt->algochoice->currenttxt->algochoice->currenttxt->textcontent == "full solve") {
+        return 2;
+    } else
+        return 3;
+}
+
+bool eventloop(sf::RenderWindow &window, textsf *textbar, sfimage *images, senting *sender)
 {
     sf::Event event;
+    int temp = 0;
+    int value = 1;
 
 // while there are pending events...
     while (window.pollEvent(event))
@@ -14,64 +38,61 @@ bool eventloop(sf::RenderWindow &window, textsf &textbar)
         } else if (event.type == sf::Event::KeyPressed)
         {
             if (event.key.code == sf::Keyboard::Down) {
-            textbar.textsfDown();
+            textbar->textsfDown();
             } else if (event.key.code == sf::Keyboard::Up)
             {
-                textbar.textsfUp();
-            } else if (event.key.code == sf::Keyboard::Enter)
-            {
-                textbar.currenttxt->activity(&window);
+                textbar->textsfUp();
+            } else if (event.key.code == sf::Keyboard::Enter) {
+                if (textbar->currenttxt->currentinuse == 0) {
+                    temp = images->createcorrect(textbar->currenttxt->textcontent);
+                } else if (textbar->currenttxt->algochoice->currenttxt->currentinuse == 0) {
+                    if (textbar->currenttxt->textcontent == "8-puzzle") {
+                        textbar->currenttxt->Puzzlealgo = new Algorithm(8, returnstrat(textbar));
+                        value = 2;
+                    } else if (textbar->currenttxt->textcontent == "24-puzzle") {
+                        textbar->currenttxt->Puzzlealgo = new Algorithm(24, returnstrat(textbar));
+                        value = 2;
+                    } else if (textbar->currenttxt->textcontent == "20-Queens") {
+                        textbar->currenttxt->Puzzlealgo = new NQueens(20);
+                        value = 2;
+                    } else if (textbar->currenttxt->textcontent == "1000000-Queens") {
+                        textbar->currenttxt->Puzzlealgo = new NQueens(1000000);
+                        value = 2;
+                    }
+                } else if (textbar->currenttxt->algochoice->currenttxt->algochoice->currenttxt->currentinuse == 0) {
+                    sender->action = returnstateur(textbar);
+                    //std::thread worker(textbar->currenttxt->Puzzlealgo->threadAlgo(images->initialstate, &sender->action, &sender->strat));
+                    //sender->worker_thread = std::move();
+                }
+                textbar->setState();
+            } else if (event.key.code == sf::Keyboard::Escape) {
+                textbar->unsetState();
             }
-
         }
     }
-    return 1;
+    return value;
 }
 
-void activity1(sf::RenderWindow *window)
-{
-    printf("yolo");
-}
-void activity2(sf::RenderWindow *window)
-{
-    printf("wolo");
-}
 
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(SCRWIDTH, SCRHEIGHT), "My alcohol ai");
     sfimage images(&window);
-    images.createdams(8);
-    textsf textbar("8-puzzle", &window, &textbar);
-    textbar.activity = &activity1;
-    textbar.newfoltext("24-puzzle", &activity2);
-    textbar.newfoltext("20-Queens", &activity1);
-    textbar.newfoltext("1000000-Queens", &activity1);
-
+    senting *sender;
+    textsf *textbar = new textsf("8-puzzle", &window, nullptr);
+    int state = 1;
+    textbar->newfoltext("24-puzzle", nullptr);
+    textbar->newfoltext("20-Queens", nullptr);
+    textbar->newfoltext("1000000-Queens", nullptr);
     while (1) {
         window.clear();
-        if (eventloop(window, textbar) == 0) {
+        images.drawall(textbar);
+        textbar->drawall();
+        window.display();
+        state = eventloop(window, textbar, &images, sender);
+        if (state == 0) {
             return 0;
         }
-        images.drawall();
-        textbar.drawall();
-        window.display();
     }
-    // Load an image file from a file
-    sf::Image background;
-    if (!background.loadFromFile("background.jpg"))
-        return -1;
-    // Create a 20x20 image filled with black color
-    sf::Image image;
-    image.create(20, 20, sf::Color::Black);
-    // Copy image1 on image2 at position (10, 10)
-    image.copy(background, 10, 10);
-    // Make the top-left pixel transparent
-    sf::Color color = image.getPixel(0, 0);
-    color.a = 0;
-    image.setPixel(0, 0, color);
-    // Save the image to a file
-    if (!image.saveToFile("result.png"))
-        return -1;
     return 0;
 }
