@@ -39,37 +39,35 @@ public:
     
 
     NQueens(int size);
-    
+
+    // Logic
+    void Compute(enum Strat strat);
     void threadAlgo(std::vector<std::vector<int>> *grid, int *solvingMethod, int *strat);
 
-    void Reset(int newSize);
-    void PrintBoard();
-    
-    int CountAttacks();
+    // Local strat methods
     bool IsAttacked(const State &state, int row);
     bool IsAttacked(const State &state, int row, int column);
-    
-    bool Equals(const NQueens &other) const;
-    
-    void RandomizeState();
-    State GetState() const;
-    void Compute(enum Strat strat);
-
-    // Local strat methods
-    void LocalStrategy();
-    void SetNeighbor(State &nState);
     int ComputeOptimalGoal(State &state);
+    void SetNeighbor(State &nState);
+    void LocalStrategy();
 
     // uninformed strat
     bool IsBoardAttacked(const Board &board, int row, int col);
-    void UninformedStrategy();
     bool SolveBoard(Board &board, int col);
-    State ConvertBoardToState(const Board &board);
-    Board ConvertStateToBoard(const State &state);
-    void SetInputGrid(std::vector<std::vector<int>> *grid);
+    void UninformedStrategy();
 
+    // getters
     long long GetIterations() const;
     long long GetTime() const;
+    State GetState() const;
+
+    // Utility Methods
+    void PrintBoard();
+    State ConvertBoardToState(const Board &board);
+    Board ConvertStateToBoard(const State &state);
+    void RandomizeState();
+    void SetInputGrid(std::vector<std::vector<int>> *grid);
+    bool Equals(const NQueens &other) const;
 
 private:
     int _solvingMethod;

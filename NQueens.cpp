@@ -7,7 +7,16 @@
 #include <chrono>
 #include <ctime>
 
-/******** ATTACK METHODS ********/
+
+NQueens::NQueens(int size) : _size(size) {
+    _state = State(size, 0);
+    _initState = _state;
+    srand(time(0));
+    _iterations = 0;
+}
+
+
+/******* LOCAL SEARCH ********/
 
 bool NQueens::IsAttacked(const State &state, int row, int col)
 {
@@ -29,42 +38,6 @@ bool NQueens::IsAttacked(const State &state, int row)
 {
     return IsAttacked(state, row, state[row]);
 }
-
-bool NQueens::IsBoardAttacked(const Board &board, int row, int col)
-{
-    for (int x = 0; x < _size; x++) {
-        if (x == col)
-            continue;
-        if (board[row][x] == QUEEN)
-            return true;
-    }
-
-    // left top
-    for (int x = row, y = col; x >= 0 && y >= 0; x--, y--) {
-        if (board[x][y] == QUEEN)
-            return true;
-    }
-    // left bot
-    for (int x = row, y = col; x < _size && y >= 0; x++, y--) {
-        if (board[x][y] == QUEEN)
-            return true;
-    }
-
-    // right top
-    for (int x = row, y = col; x >= 0 && y < _size; x--, y++) {
-        if (board[x][y] == QUEEN)
-            return true;
-    }
-    // right bot
-    for (int x = row, y = col; x < _size && y < _size; x++, y++) {
-        if (board[x][y] == QUEEN)
-            return true;
-    }
-
-    return false;
-}
-
-/******* LOCAL SEARCH ********/
 
 int NQueens::ComputeOptimalGoal(State &state)
 {
@@ -129,6 +102,40 @@ void NQueens::LocalStrategy()
 
 /******** UNINFORMED SEARCH ********/
 
+bool NQueens::IsBoardAttacked(const Board &board, int row, int col)
+{
+    for (int x = 0; x < _size; x++) {
+        if (x == col)
+            continue;
+        if (board[row][x] == QUEEN)
+            return true;
+    }
+
+    // left top
+    for (int x = row, y = col; x >= 0 && y >= 0; x--, y--) {
+        if (board[x][y] == QUEEN)
+            return true;
+    }
+    // left bot
+    for (int x = row, y = col; x < _size && y >= 0; x++, y--) {
+        if (board[x][y] == QUEEN)
+            return true;
+    }
+
+    // right top
+    for (int x = row, y = col; x >= 0 && y < _size; x--, y++) {
+        if (board[x][y] == QUEEN)
+            return true;
+    }
+    // right bot
+    for (int x = row, y = col; x < _size && y < _size; x++, y++) {
+        if (board[x][y] == QUEEN)
+            return true;
+    }
+
+    return false;
+}
+
 bool NQueens::SolveBoard(Board &board, int col)
 {
     if (col >= _size)
@@ -152,6 +159,76 @@ bool NQueens::SolveBoard(Board &board, int col)
     }
 
     return false;
+}
+
+void NQueens::UninformedStrategy()
+{
+    Board board(_size, State(_size, EMPTY));
+
+    SolveBoard(board, 0);
+
+    _state = ConvertBoardToState(board);
+}
+
+////////////////////////
+
+/******** Logic ********/
+
+void NQueens::Compute(enum NQueens::Strat strat)
+{
+    auto time0 = std::chrono::high_resolution_clock::now();
+
+    switch (strat) {
+        case LOCAL:
+            RandomizeState();
+            LocalStrategy();
+            break;
+        case INFORMED:
+            std::cout << "INFORMED IS NOT IMPLEMENTED" << std::endl;
+            break;
+        case UNINFORMED:
+            UninformedStrategy();
+            break;
+    }
+    auto time1 = std::chrono::high_resolution_clock::now();
+    _timer = std::chrono::duration_cast<std::chrono::milliseconds>(time1 - time0).count();
+}
+
+void NQueens::threadAlgo(std::vector<std::vector<int>> *grid, int *solvingMethod, int *strat)
+{
+    _solvingMethod = *solvingMethod;
+    SetInputGrid(grid);
+    enum Strat algoStrat = (*strat == 0) ? INFORMED : (*strat == 1) ? UNINFORMED : LOCAL;
+
+    Compute(algoStrat);
+
+    *_grid = ConvertStateToBoard(_state);
+}
+
+/******** GETTERS ********/
+
+long long NQueens::GetIterations() const
+{ return _iterations; }
+
+long long NQueens::GetTime() const
+{ return _timer; }
+
+State NQueens::GetState() const
+{ return _state; }
+
+/******** UTILITY METHODS ********/
+
+void NQueens::PrintBoard() {
+    for (int row = 0; row < _size; ++row) {
+
+        for (int col = 0; col < _size; ++col) {
+            if (col == _state[row])
+                std::cout << "Q ";
+            else
+                std::cout << "_ ";
+        }
+        std::cout << std::endl;
+    }
 }
 
 State NQueens::ConvertBoardToState(const Board &board)
@@ -184,55 +261,12 @@ Board NQueens::ConvertStateToBoard(const State &state)
     return b;
 }
 
-void NQueens::UninformedStrategy()
-{
-    Board board(_size, State(_size, EMPTY));
-
-    SolveBoard(board, 0);
-
-    _state = ConvertBoardToState(board);
-}
-
-////////////////////////
-
-NQueens::NQueens(int size) : _size(size) {
-    _state = State(size, 0);
-    _initState = _state;
-    srand(time(0));
-    _iterations = 0;
-}
-
 void NQueens::RandomizeState()
 {
     for (int i = 0; i < _size; i++) {
         _state[i] = rand() % _size;
     }
     _initState = _state;
-}
-
-void NQueens::Compute(enum NQueens::Strat strat)
-{
-    auto time0 = std::chrono::high_resolution_clock::now();
-
-    switch (strat) {
-        case LOCAL:
-            RandomizeState();
-            LocalStrategy();
-            break;
-        case INFORMED:
-            std::cout << "INFORMED IS NOT IMPLEMENTED" << std::endl;
-            break;
-        case UNINFORMED:
-            UninformedStrategy();
-            break;
-    }
-    auto time1 = std::chrono::high_resolution_clock::now();
-    _timer = std::chrono::duration_cast<std::chrono::milliseconds>(time1 - time0).count();
-}
-
-void NQueens::Reset(int newSize)
-{
-     _state = _initState;
 }
 
 void NQueens::SetInputGrid(Board *grid)
@@ -244,36 +278,6 @@ void NQueens::SetInputGrid(Board *grid)
     _initState = _state;
 }
 
-void NQueens::threadAlgo(std::vector<std::vector<int>> *grid, int *solvingMethod, int *strat)
-{
-    _solvingMethod = *solvingMethod;
-    SetInputGrid(grid);
-    enum Strat algoStrat = (*strat == 0) ? INFORMED : (*strat == 1) ? UNINFORMED : LOCAL;
-
-    Compute(algoStrat);
-
-    *_grid = ConvertStateToBoard(_state);
-}
-
-void NQueens::PrintBoard() {
-    for (int row = 0; row < _size; ++row) {
-
-        for (int col = 0; col < _size; ++col) {
-            if (col == _state[row])
-                std::cout << "Q ";
-            else
-                std::cout << "_ ";
-        }
-        std::cout << std::endl;
-    }
-}
-
-long long NQueens::GetIterations() const
-{ return _iterations; }
-
-long long NQueens::GetTime() const
-{ return _timer; }
-
 bool NQueens::Equals(const NQueens &other) const
 {
     if (this == &other)
@@ -281,6 +285,3 @@ bool NQueens::Equals(const NQueens &other) const
 
     return other.GetState() == _state;
 }
-
-State NQueens::GetState() const
-{ return _state; }
