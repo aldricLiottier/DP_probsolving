@@ -59,11 +59,11 @@ bool eventloop(sf::RenderWindow &window, textsf *textbar, sfimage *images, senti
                         textbar->currenttxt->Puzzlealgo = new NQueens(1000000);
                         value = 2;
                     }
-                } else if (textbar->currenttxt->algochoice->currenttxt->algochoice->currenttxt->currentinuse == 0) {
-                    sender->action = returnstateur(textbar);
+                } //else if (textbar->currenttxt->algochoice->currenttxt->algochoice->currenttxt->currentinuse == 0) {
+                    //sender->action = returnstateur(textbar);
                     //std::thread worker(textbar->currenttxt->Puzzlealgo->threadAlgo(images->initialstate, &sender->action, &sender->strat));
                     //sender->worker_thread = std::move();
-                }
+                //}
                 textbar->setState();
             } else if (event.key.code == sf::Keyboard::Escape) {
                 textbar->unsetState();

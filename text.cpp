@@ -54,7 +54,8 @@ void textsf::setState()
         if (currenttxt->algochoice != nullptr)
             currenttxt->algochoice->setState();
     }
-    currenttxt->currentinuse = 1;
+    if (currenttxt->algochoice != nullptr)
+        currenttxt->currentinuse = 1;
 }
 
 bool textsf::unsetState()
@@ -120,7 +121,7 @@ void textsf::drawall()
         if (next != nullptr) {
             next->drawall();
         }
-    } else {
+    } else if (currenttxt->algochoice != nullptr){
         currenttxt->algochoice->drawall();
     }
 
