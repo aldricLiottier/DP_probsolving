@@ -1,6 +1,6 @@
 #include "Algorithm.hpp"
 
-Algorithm::Algorithm(int n, STRAT strat)
+Algorithm::Algorithm(int n, STRAT strategy)
 {
     std::srand(std::time(nullptr));
     double intpart;
@@ -8,13 +8,15 @@ Algorithm::Algorithm(int n, STRAT strat)
         _n = n;
         _len = sqrt(n + 1);
     }
-    _strategy = strat;
+    _strategy = strategy;
     _openList = new List;
     _closeList = new List;
 
     // _A_finalConfig = fill_A_Config();
     // _B_finalConfig = fill_B_Config();
     tabGui = NULL;
+    state = NULL;
+    strat = NULL;
 }
 
 Algorithm::~Algorithm()
@@ -44,9 +46,11 @@ int Algorithm::randomInt(std::vector<int> tab)
     return (rand);
 }
 
-void Algorithm::threadAlgo(std::vector<std::vector<int>> *grid, int &state, int &strat)
+void Algorithm::threadAlgo(std::vector<std::vector<int>> *grid, int *state, int *strat)
 {
     tabGui = grid;
+    this->state = state;
+    this->state = strat;
 }
 
 std::vector<int> Algorithm::convertIntToVector(int **tab)
@@ -229,11 +233,12 @@ Algorithm::Node *Algorithm::getBestNode()
 // }
 
 template<typename T>
-int algoProcess(SNode &finalNode, std::set<SNode> &closedNode, T &list) {
+int Algorithm::algoProcess(SNode &finalNode, std::set<SNode> &closedNode, T &list) {
     int iter = 0;
     while (!list.empty()) {
         SNode next = list.top();
         // convertIntToVector(next.getTiles()); // SEND TO GUI
+
         list.pop();
         if (next.isFinished()) {
             finalNode = next;
@@ -241,21 +246,25 @@ int algoProcess(SNode &finalNode, std::set<SNode> &closedNode, T &list) {
         }
         if (closedNode.empty() || closedNode.find(next) == closedNode.end()) {
             closedNode.insert(next);
-            std::vector<SNode> children = next.expand();
+            std::vector<SNode> children = next.toNext();
             for (SNode &s : children) {
                 list.push(s);
             }
         }
         iter++;
+        if ((*this->state) == 2) {
+            (*tabGui) = convertVectorToVector(convertIntToVector(next.getTiles()));
+            std::lock_guard<std::mutex> guard(_algoMutex);
+        }
     }
     return -1;
 }
 
-int depthFirstSearch(SNode &finalNode, std::set<SNode> &closedNode, std::stack<SNode> &list) {
+int Algorithm::depthFirstSearch(SNode &finalNode, std::set<SNode> &closedNode, std::stack<SNode> &list) {
     return algoProcess(finalNode, closedNode, list);
 }
 
-int bestFirstSearch(SNode &finalNode, std::set<SNode> &closedNode, OwnPrioQueue &list) {
+int Algorithm::bestFirstSearch(SNode &finalNode, std::set<SNode> &closedNode, OwnPrioQueue &list) {
     return algoProcess(finalNode, closedNode, list);
 }
 
@@ -411,7 +420,10 @@ void Algorithm::localAlgo()
         _closedList.push_back(std::pair<int, std::pair<int, int>>(indexZero, std::pair<int, int>(_indexAvailablePosition[bestScore.first].first, _indexAvailablePosition[bestScore.first].second)));
         _iteration++;
         addToOpenList(_tab, findNodeFromGrid(cpy));
-    
+        if ((*this->state) == 2) {
+            (*tabGui) = convertVectorToVector(_tab);
+            std::lock_guard<std::mutex> guard(_algoMutex);
+        }
     }
     showPath();
     // showList();

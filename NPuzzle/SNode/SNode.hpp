@@ -60,7 +60,7 @@ class SNode {
 
         std::string toString() const;
 
-        std::vector<SNode> expand();
+        std::vector<SNode> toNext();
 
         std::vector<std::string> getPath();
 };

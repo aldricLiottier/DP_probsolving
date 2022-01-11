@@ -198,23 +198,18 @@ int SNode::inPlace() {
     return score;
 }
 
-std::vector<SNode> SNode::expand() {
-    std::vector<SNode> children;
-
-    SNode s;
-    if (moveUp(s))
-        children.push_back(s);
-
-    if (moveDown(s))
-        children.push_back(s);
-
-    if (moveLeft(s))
-        children.push_back(s);
-
-    if (moveRight(s))
-        children.push_back(s);
-
-    return children;
+std::vector<SNode> SNode::toNext() {
+    std::vector<SNode> childs;
+    SNode newChild;
+    if (moveUp(newChild))
+        childs.push_back(newChild);
+    if (moveDown(newChild))
+        childs.push_back(newChild);
+    if (moveLeft(newChild))
+        childs.push_back(newChild);
+    if (moveRight(newChild))
+        childs.push_back(newChild);
+    return childs;
 }
 
 void SNode::moveBlank(Coords c) {

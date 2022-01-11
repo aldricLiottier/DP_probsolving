@@ -8,6 +8,10 @@
 #include <iomanip>
 #include <fstream>
 #include <chrono>
+#include <map>
+#include <string>
+#include <thread>
+#include <mutex>
 #include "../SNode/DataStruct.hpp"
 
 class Algorithm
@@ -32,7 +36,7 @@ class Algorithm
             Node *node;
         };
 
-        Algorithm(int n, STRAT strat = STRAT::INFORMED);
+        Algorithm(int n, STRAT strategy = STRAT::INFORMED);
         ~Algorithm();
         void compute();
         int randomInt(std::vector<int> tab);
@@ -40,7 +44,7 @@ class Algorithm
         void showFinalConfig();
         void show(std::vector<int> tab);
         void showList();
-        void threadAlgo(std::vector<std::vector<int>> *grid, int &state, int &strat);
+        void threadAlgo(std::vector<std::vector<int>> *grid, int *state, int *strat);
     private:
         std::vector<int> createTab();
         void localAlgo();
@@ -65,6 +69,10 @@ class Algorithm
         void showPath();
         std::vector<int> convertIntToVector(int **tab);
         std::vector<std::vector<int>> convertVectorToVector(std::vector<int> grid);
+        int depthFirstSearch(SNode &finalNode, std::set<SNode> &closedNode, std::stack<SNode> &list);
+        int bestFirstSearch(SNode &finalNode, std::set<SNode> &closedNode, OwnPrioQueue &list);
+        template<typename T>
+        int algoProcess(SNode &finalNode, std::set<SNode> &closedNode, T &list);
         // std::vector<int> fill_A_Config();
         // std::vector<int> fill_B_Config();
         // void checkWhichConfig();
@@ -88,4 +96,7 @@ class Algorithm
         std::vector<std::vector<int>> _inactiveQueue;
 
         std::vector<std::vector<int>> *tabGui;
+        int *state;
+        int *strat;
+        std::mutex _algoMutex;
 };
